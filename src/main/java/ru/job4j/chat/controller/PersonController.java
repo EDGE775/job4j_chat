@@ -2,6 +2,7 @@ package ru.job4j.chat.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Role;
@@ -20,9 +21,13 @@ public class PersonController {
 
     private final RoleService roleService;
 
-    public PersonController(PersonService personService, RoleService roleService) {
+    private BCryptPasswordEncoder encoder;
+
+    public PersonController(PersonService personService, RoleService roleService,
+                            BCryptPasswordEncoder encoder) {
         this.personService = personService;
         this.roleService = roleService;
+        this.encoder = encoder;
     }
 
     @GetMapping
@@ -39,11 +44,12 @@ public class PersonController {
         );
     }
 
-    @PostMapping("/reg")
+    @PostMapping("/sign-up")
     public ResponseEntity<Person> savePerson(@RequestBody Person person,
                                              @RequestParam int role) {
         Role roleDB = roleService.findById(role).get();
         person.setRole(roleDB);
+        person.setPassword(encoder.encode(person.getPassword()));
         return new ResponseEntity<>(
                 personService.save(person),
                 HttpStatus.CREATED

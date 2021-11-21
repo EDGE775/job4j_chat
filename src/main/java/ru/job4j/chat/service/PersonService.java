@@ -35,4 +35,8 @@ public class PersonService {
     public void delete(Person person) {
         repository.delete(person);
     }
+
+    public Person findByName(String name) {
+        return repository.findByName(name);
+    }
 }
