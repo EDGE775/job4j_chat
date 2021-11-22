@@ -3,6 +3,7 @@ package ru.job4j.chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.job4j.chat.controller.exception.ObjectNotFoundException;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Room;
@@ -36,24 +37,29 @@ public class RoomController {
 
     @GetMapping
     public ResponseEntity<List<Room>> getAllRoomsByCreator(@PathVariable int personId) {
-        Person person = personService.findById(personId).get();
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         return new ResponseEntity<>(roomService.findByCreator(person), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Room> findById(@PathVariable int personId,
                                          @PathVariable int id) {
-        var room = roomService.findById(id);
-        return new ResponseEntity<>(
-                room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room room = roomService.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
+        return new ResponseEntity<>(room, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<Room> createRoom(@PathVariable int personId,
                                            @RequestBody Room room) {
-        Person person = personService.findById(personId).get();
+        if (room.getName() == null) {
+            throw new NullPointerException("Room name mustn't be empty");
+        }
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         room.setCreator(person);
         return new ResponseEntity<>(
                 roomService.save(room),
@@ -65,7 +71,13 @@ public class RoomController {
     public ResponseEntity<Void> updateRoom(@PathVariable int personId,
                                            @PathVariable int roomId,
                                            @RequestBody Room room) {
-        Room roomDB = roomService.findById(roomId).get();
+        if (room.getName() == null) {
+            throw new NullPointerException("Room name mustn't be empty");
+        }
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room roomDB = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
         roomDB.setName(room.getName());
         roomService.save(roomDB);
         return ResponseEntity.ok().build();
@@ -74,16 +86,21 @@ public class RoomController {
     @DeleteMapping("/{roomId}")
     public ResponseEntity<Void> deleteRoom(@PathVariable int personId,
                                            @PathVariable int roomId) {
-        Room room = roomService.findById(roomId).get();
-        roomService.delete(room);
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room roomDB = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
+        roomService.delete(roomDB);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{roomId}/add")
     public ResponseEntity<Void> addPersonToRoom(@PathVariable int personId,
                                                 @PathVariable int roomId) {
-        Room roomDB = roomService.findById(roomId).get();
-        Person personDB = personService.findById(personId).get();
+        Person personDB = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room roomDB = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
         roomDB.addPerson(personDB);
         roomService.save(roomDB);
         return ResponseEntity.ok().build();
@@ -92,8 +109,10 @@ public class RoomController {
     @DeleteMapping("/{roomId}/delete")
     public ResponseEntity<Void> deletePersonFromRoom(@PathVariable int personId,
                                                      @PathVariable int roomId) {
-        Room roomDB = roomService.findById(roomId).get();
-        Person personDB = personService.findById(personId).get();
+        Person personDB = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room roomDB = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
         roomDB.removePerson(personDB);
         roomService.save(roomDB);
         return ResponseEntity.ok().build();

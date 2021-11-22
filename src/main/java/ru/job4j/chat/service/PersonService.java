@@ -39,4 +39,8 @@ public class PersonService {
     public Person findByName(String name) {
         return repository.findByName(name);
     }
+
+    public Person findByEmail(String email) {
+        return repository.findByEmail(email);
+    }
 }

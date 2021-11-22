@@ -3,6 +3,7 @@ package ru.job4j.chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.job4j.chat.controller.exception.ObjectNotFoundException;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Room;
@@ -36,7 +37,10 @@ public class MessageController {
     @GetMapping
     public ResponseEntity<List<Message>> getAllMessagesByRoom(@PathVariable int personId,
                                                               @PathVariable int roomId) {
-        Room room = roomService.findById(roomId).get();
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room room = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
         List<Message> messages = StreamSupport.stream(
                 this.messageService.findByRoom(room).spliterator(), false)
                 .collect(Collectors.toList());
@@ -47,8 +51,13 @@ public class MessageController {
     public ResponseEntity<Message> createMessage(@PathVariable int personId,
                                                  @PathVariable int roomId,
                                                  @RequestBody Message message) {
-        Room room = roomService.findById(roomId).get();
-        Person person = personService.findById(personId).get();
+        if (message.getText() == null) {
+            throw new NullPointerException("Text mustn't be empty");
+        }
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room room = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
         message.setAuthor(person);
         message.setRoom(room);
         return new ResponseEntity<>(
@@ -59,12 +68,18 @@ public class MessageController {
 
     @PutMapping
     public ResponseEntity<Void> updateMessage(@PathVariable int personId,
-                                                 @PathVariable int roomId,
-                                                 @RequestBody Message message,
-                                                 @RequestParam int id) {
-        Room room = roomService.findById(roomId).get();
-        Person person = personService.findById(personId).get();
-        Message messageDB = messageService.findById(id).get();
+                                              @PathVariable int roomId,
+                                              @RequestBody Message message,
+                                              @RequestParam int id) {
+        if (message.getText() == null) {
+            throw new NullPointerException("Text mustn't be empty");
+        }
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room room = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
+        Message messageDB = messageService.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(Message.class));
         messageDB.setAuthor(person);
         messageDB.setRoom(room);
         messageDB.setText(message.getText());
@@ -73,11 +88,16 @@ public class MessageController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(@PathVariable int personId,
+    public ResponseEntity<Void> deleteMessage(@PathVariable int personId,
                                        @PathVariable int roomId,
                                        @RequestParam int id) {
-        Message message = messageService.findById(id).get();
-        messageService.delete(message);
+        Person person = personService.findById(personId)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room room = roomService.findById(roomId)
+                .orElseThrow(() -> new ObjectNotFoundException(Room.class));
+        Message messageDB = messageService.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(Message.class));
+        messageService.delete(messageDB);
         return ResponseEntity.ok().build();
     }
 }
