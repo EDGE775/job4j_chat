@@ -44,7 +44,9 @@ public class MessageController {
         List<Message> messages = StreamSupport.stream(
                 this.messageService.findByRoom(room).spliterator(), false)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(messages, HttpStatus.OK);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(messages);
     }
 
     @PostMapping
