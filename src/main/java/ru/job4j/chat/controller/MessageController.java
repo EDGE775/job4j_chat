@@ -7,6 +7,7 @@ import ru.job4j.chat.controller.exception.ObjectNotFoundException;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Room;
+import ru.job4j.chat.model.dto.MessageDTO;
 import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoomService;
@@ -52,14 +53,16 @@ public class MessageController {
     @PostMapping
     public ResponseEntity<Message> createMessage(@PathVariable int personId,
                                                  @PathVariable int roomId,
-                                                 @RequestBody Message message) {
-        if (message.getText() == null) {
+                                                 @RequestBody MessageDTO messageDTO) {
+        if (messageDTO.getText() == null) {
             throw new NullPointerException("Text mustn't be empty");
         }
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         Room room = roomService.findById(roomId)
                 .orElseThrow(() -> new ObjectNotFoundException(Room.class));
+        Message message = new Message();
+        message.setText(messageDTO.getText());
         message.setAuthor(person);
         message.setRoom(room);
         return new ResponseEntity<>(
@@ -71,9 +74,9 @@ public class MessageController {
     @PutMapping
     public ResponseEntity<Void> updateMessage(@PathVariable int personId,
                                               @PathVariable int roomId,
-                                              @RequestBody Message message,
+                                              @RequestBody MessageDTO messageDTO,
                                               @RequestParam int id) {
-        if (message.getText() == null) {
+        if (messageDTO.getText() == null) {
             throw new NullPointerException("Text mustn't be empty");
         }
         Person person = personService.findById(personId)
@@ -82,9 +85,7 @@ public class MessageController {
                 .orElseThrow(() -> new ObjectNotFoundException(Room.class));
         Message messageDB = messageService.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(Message.class));
-        messageDB.setAuthor(person);
-        messageDB.setRoom(room);
-        messageDB.setText(message.getText());
+        messageDB.setText(messageDTO.getText());
         messageService.save(messageDB);
         return ResponseEntity.ok().build();
     }

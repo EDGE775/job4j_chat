@@ -7,6 +7,7 @@ import ru.job4j.chat.controller.exception.ObjectNotFoundException;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Room;
+import ru.job4j.chat.model.dto.RoomDTO;
 import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoomService;
@@ -70,15 +71,15 @@ public class RoomController {
     @PutMapping("/{roomId}")
     public ResponseEntity<Void> updateRoom(@PathVariable int personId,
                                            @PathVariable int roomId,
-                                           @RequestBody Room room) {
-        if (room.getName() == null) {
+                                           @RequestBody RoomDTO roomDTO) {
+        if (roomDTO.getName() == null) {
             throw new NullPointerException("Room name mustn't be empty");
         }
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         Room roomDB = roomService.findById(roomId)
                 .orElseThrow(() -> new ObjectNotFoundException(Room.class));
-        roomDB.setName(room.getName());
+        roomDB.setName(roomDTO.getName());
         roomService.save(roomDB);
         return ResponseEntity.ok().build();
     }

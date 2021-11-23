@@ -11,6 +11,7 @@ import ru.job4j.chat.controller.exception.ObjectNotFoundException;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Role;
 import ru.job4j.chat.model.Room;
+import ru.job4j.chat.model.dto.PersonDTO;
 import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoleService;
 
@@ -75,6 +76,31 @@ public class PersonController {
         return new ResponseEntity<>(
                 personService.save(person),
                 HttpStatus.CREATED
+        );
+    }
+
+    @PatchMapping("/{id}/edit")
+    public ResponseEntity<Person> editPerson(@RequestBody PersonDTO personDTO,
+                                             @PathVariable int id,
+                                             @RequestParam(required = false) int role) {
+        if (personDTO.getName() == null
+                && personDTO.getPassword() == null
+                && personDTO.getEmail() == null) {
+            throw new NullPointerException("Name or pass or email mustn't be empty");
+        }
+        if (role != 0) {
+            roleService.findById(role)
+                    .orElseThrow(() -> new ObjectNotFoundException(Role.class));
+            personDTO.setRoleId(role);
+        }
+        if (personDTO.getPassword() != null) {
+            personDTO.setPassword(encoder.encode(personDTO.getPassword()));
+        }
+        Person personDB = personService.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        return new ResponseEntity<>(
+                personService.patch(personDB, personDTO),
+                HttpStatus.OK
         );
     }
 
