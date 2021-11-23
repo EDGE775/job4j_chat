@@ -1,12 +1,11 @@
 package ru.job4j.chat.model.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class MessageDTO {
 
+    @NotBlank(message = "Text must be not empty")
     private String text;
-
-    public MessageDTO(String text) {
-        this.text = text;
-    }
 
     public String getText() {
         return text;

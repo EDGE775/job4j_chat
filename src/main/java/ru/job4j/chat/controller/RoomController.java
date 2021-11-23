@@ -12,6 +12,7 @@ import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoomService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,26 +56,19 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<Room> createRoom(@PathVariable int personId,
-                                           @RequestBody Room room) {
-        if (room.getName() == null) {
-            throw new NullPointerException("Room name mustn't be empty");
-        }
+                                           @Valid @RequestBody RoomDTO roomDTO) {
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
+        Room room = new Room();
         room.setCreator(person);
-        return new ResponseEntity<>(
-                roomService.save(room),
-                HttpStatus.CREATED
-        );
+        room.setName(roomDTO.getName());
+        return new ResponseEntity<>(roomService.save(room), HttpStatus.CREATED);
     }
 
     @PutMapping("/{roomId}")
     public ResponseEntity<Void> updateRoom(@PathVariable int personId,
                                            @PathVariable int roomId,
-                                           @RequestBody RoomDTO roomDTO) {
-        if (roomDTO.getName() == null) {
-            throw new NullPointerException("Room name mustn't be empty");
-        }
+                                           @Valid @RequestBody RoomDTO roomDTO) {
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         Room roomDB = roomService.findById(roomId)

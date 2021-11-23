@@ -6,18 +6,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.chat.controller.exception.ObjectNotFoundException;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Role;
 import ru.job4j.chat.model.Room;
 import ru.job4j.chat.model.dto.PersonDTO;
+import ru.job4j.chat.model.validation.Operation;
 import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoleService;
 
 import javax.security.auth.login.AccountException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -59,39 +62,29 @@ public class PersonController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<Person> savePerson(@RequestBody Person person,
-                                             @RequestParam int role) {
-        if (person.getName() == null
-                || person.getPassword() == null
-                || person.getEmail() == null) {
-            throw new NullPointerException("Name, pass and email mustn't be empty");
-        }
-        if (personService.findByEmail(person.getEmail()) != null) {
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Person> savePerson(@Valid @RequestBody PersonDTO personDTO) {
+        if (personService.findByEmail(personDTO.getEmail()) != null) {
             throw new IllegalArgumentException("Person with this email already exist.");
         }
-        Role roleDB = roleService.findById(role)
+        Role roleDB = roleService.findById(personDTO.getRoleId())
                 .orElseThrow(() -> new ObjectNotFoundException(Role.class));
+        Person person = new Person();
         person.setRole(roleDB);
-        person.setPassword(encoder.encode(person.getPassword()));
-        return new ResponseEntity<>(
-                personService.save(person),
-                HttpStatus.CREATED
-        );
+        person.setPassword(encoder.encode(personDTO.getPassword()));
+        person.setName(personDTO.getName());
+        person.setEmail(personDTO.getEmail());
+        return new ResponseEntity<>(personService.save(person), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/edit")
     public ResponseEntity<Person> editPerson(@RequestBody PersonDTO personDTO,
-                                             @PathVariable int id,
-                                             @RequestParam(required = false) int role) {
+                                             @PathVariable int id) {
         if (personDTO.getName() == null
                 && personDTO.getPassword() == null
-                && personDTO.getEmail() == null) {
-            throw new NullPointerException("Name or pass or email mustn't be empty");
-        }
-        if (role != 0) {
-            roleService.findById(role)
-                    .orElseThrow(() -> new ObjectNotFoundException(Role.class));
-            personDTO.setRoleId(role);
+                && personDTO.getEmail() == null
+                && personDTO.getRoleId() == 0) {
+            throw new NullPointerException("Name or pass or email or role mustn't be empty");
         }
         if (personDTO.getPassword() != null) {
             personDTO.setPassword(encoder.encode(personDTO.getPassword()));
@@ -105,18 +98,17 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePerson(@RequestBody Person person,
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> updatePerson(@Valid @RequestBody PersonDTO personDTO,
                                              @PathVariable int id) {
-        if (person.getName() == null
-                || person.getPassword() == null
-                || person.getEmail() == null) {
-            throw new NullPointerException("Name, pass and email mustn't be empty");
-        }
         Person personDB = personService.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
-        personDB.setEmail(person.getEmail());
-        personDB.setName(person.getName());
-        personDB.setPassword(person.getPassword());
+        Role roleDB = roleService.findById(personDTO.getRoleId())
+                .orElseThrow(() -> new ObjectNotFoundException(Role.class));
+        personDB.setEmail(personDTO.getEmail());
+        personDB.setName(personDTO.getName());
+        personDB.setPassword(personDTO.getPassword());
+        personDB.setRole(roleDB);
         personService.save(personDB);
         return ResponseEntity.ok().build();
     }

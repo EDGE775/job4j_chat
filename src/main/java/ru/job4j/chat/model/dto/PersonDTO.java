@@ -1,20 +1,27 @@
 package ru.job4j.chat.model.dto;
 
+import ru.job4j.chat.model.validation.Operation;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+
 public class PersonDTO {
 
+    @NotBlank(message = "Name must be not empty",
+            groups = {Operation.OnCreate.class, Operation.OnUpdate.class})
     private String name;
 
+    @NotBlank(message = "Email must be not empty",
+            groups = {Operation.OnCreate.class, Operation.OnUpdate.class})
     private String email;
 
+    @NotBlank(message = "Password must be not empty",
+            groups = {Operation.OnCreate.class, Operation.OnUpdate.class})
     private String password;
 
+    @Min(value = 1, message = "Year must be more than 0",
+            groups = {Operation.OnCreate.class, Operation.OnUpdate.class})
     private int roleId;
-
-    public PersonDTO(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
 
     public String getName() {
         return name;

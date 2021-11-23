@@ -12,6 +12,7 @@ import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoomService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,10 +54,7 @@ public class MessageController {
     @PostMapping
     public ResponseEntity<Message> createMessage(@PathVariable int personId,
                                                  @PathVariable int roomId,
-                                                 @RequestBody MessageDTO messageDTO) {
-        if (messageDTO.getText() == null) {
-            throw new NullPointerException("Text mustn't be empty");
-        }
+                                                 @Valid @RequestBody MessageDTO messageDTO) {
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         Room room = roomService.findById(roomId)
@@ -74,11 +72,8 @@ public class MessageController {
     @PutMapping
     public ResponseEntity<Void> updateMessage(@PathVariable int personId,
                                               @PathVariable int roomId,
-                                              @RequestBody MessageDTO messageDTO,
+                                              @Valid @RequestBody MessageDTO messageDTO,
                                               @RequestParam int id) {
-        if (messageDTO.getText() == null) {
-            throw new NullPointerException("Text mustn't be empty");
-        }
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         Room room = roomService.findById(roomId)
@@ -92,8 +87,8 @@ public class MessageController {
 
     @DeleteMapping
     public ResponseEntity<Void> deleteMessage(@PathVariable int personId,
-                                       @PathVariable int roomId,
-                                       @RequestParam int id) {
+                                              @PathVariable int roomId,
+                                              @RequestParam int id) {
         Person person = personService.findById(personId)
                 .orElseThrow(() -> new ObjectNotFoundException(Person.class));
         Room room = roomService.findById(roomId)
