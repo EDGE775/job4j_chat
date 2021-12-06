@@ -52,4 +52,9 @@ public class GlobalExceptionHandler {
                         .collect(Collectors.toList())
         );
     }
+
+    @ExceptionHandler
+    public ResponseEntity<BadResponse> handleError(Exception e) {
+        return ResponseEntity.ok(new BadResponse(e.getMessage()));
+    }
 }

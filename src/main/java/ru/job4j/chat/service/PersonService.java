@@ -3,6 +3,7 @@ package ru.job4j.chat.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.job4j.chat.mapper.PersonMapper;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.dto.PersonDTO;
 import ru.job4j.chat.repository.PersonRepository;
@@ -15,6 +16,9 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class PersonService {
+
+    @Autowired
+    private PersonMapper personMapper;
 
     private final PersonRepository repository;
 
