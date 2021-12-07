@@ -26,6 +26,19 @@ public class Message {
     @ManyToOne
     private Room room;
 
+    public Message() {
+    }
+
+    public Message(String text) {
+        this.text = text;
+    }
+
+    public Message(String text, Person author, Room room) {
+        this.text = text;
+        this.author = author;
+        this.room = room;
+    }
+
     public int getId() {
         return id;
     }
@@ -77,13 +90,12 @@ public class Message {
         Message message = (Message) o;
         return id == message.id
                 && Objects.equals(text, message.text)
-                && Objects.equals(created, message.created)
                 && Objects.equals(author, message.author)
                 && Objects.equals(room, message.room);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, text, created, author, room);
+        return Objects.hash(id, text, author, room);
     }
 }

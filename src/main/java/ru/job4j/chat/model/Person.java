@@ -28,6 +28,26 @@ public class Person {
     @ManyToMany(mappedBy = "persons")
     private Set<Room> rooms;
 
+    public Person() {
+    }
+
+    public Person(int id) {
+        this.id = id;
+    }
+
+    public Person(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    public Person(String name, String email, String password, Role role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
     public void addRoom(Room room) {
         rooms.add(room);
     }

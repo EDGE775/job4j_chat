@@ -15,6 +15,22 @@ public class Room {
 
     private String name;
 
+    public Room() {
+    }
+
+    public Room(int id) {
+        this.id = id;
+    }
+
+    public Room(String name) {
+        this.name = name;
+    }
+
+    public Room(String name, Person creator) {
+        this.name = name;
+        this.creator = creator;
+    }
+
     @ManyToOne
     @JoinColumn(name = "creator_id")
     private Person creator;

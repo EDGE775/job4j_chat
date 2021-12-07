@@ -63,8 +63,9 @@ public class MessageController {
         message.setText(messageDTO.getText());
         message.setAuthor(person);
         message.setRoom(room);
+        Message messageDB = messageService.save(message);
         return new ResponseEntity<>(
-                messageService.save(message),
+                messageDB,
                 HttpStatus.CREATED
         );
     }
