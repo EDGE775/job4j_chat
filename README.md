@@ -2,8 +2,6 @@
 [![Build Status](https://app.travis-ci.com/EDGE775/job4j_chat.svg?branch=master)](https://app.travis-ci.com/EDGE775/job4j_chat)
 [![codecov](https://codecov.io/gh/EDGE775/job4j_chat/branch/master/graph/badge.svg?token=T2XUH6XQUL)](https://codecov.io/gh/EDGE775/job4j_chat)
 
-> REST API for chat
-
 ## Table of contents
 * [General info](#general-info)
 * [Technologies](#technologies)
@@ -13,9 +11,7 @@
 * [Contact](#contact)
 
 ## General info
-This project is a Spring Boot RESTfull API using Spring Security and JWT for authentication and authorization.
-This is a simple service that implements the server side of an online chat.
-It uses simple CRUD operations.
+This project is a basic REST API for a chat.
 
 ## Technologies
 * Java 17
